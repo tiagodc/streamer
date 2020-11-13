@@ -1,12 +1,14 @@
 ## C++ real time video streamer
 *Tiago de Conto, 13/11/2020*
 
+A lógica do streamer está toda no arquivo `main.cpp`. Os comandos do compilador (`g++`) estão *hard coded* em `buid.sh`. O ideal seria usar o `cmake` e fazer um `makefile` apropriado... *but life is too short*.   
+
 #### Instruções
 
 Compilar a imagem docker e executar:
 ```
 cd streamer
-docker build -f Dockerfile -t cpp-streamer-1 .
+docker build -f Dockerfile -t cpp-streamer .
 ```
 
 Gere o stream rtsp >> websocket:
