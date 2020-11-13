@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>test streamer</title>
+    <script>
+      var ws = new WebSocket('ws://' + "localhost:9090" + '/ws');
+
+      ws.onopen = function() {
+          console.log('onopen');
+      };
+      ws.onclose = function() {
+          console.log('onclose');
+      };
+      ws.onmessage = function(message) {
+          document.getElementById('image').src = 'data:image/jpg;base64,'+ message.data;
+      };
+      ws.onerror = function(error) {
+          console.log('onerror ' + error);
+      };
+
+      window.addEventListener('beforeunload', (event) => {
+          ws.send('close');
+          // ws.send('die');
+      });
+    </script>
+  </head>
+  <body>
+    <img id="image" src="" width="600" height="400"/>  
+  </body>
+</html>
+
