@@ -131,7 +131,12 @@ int main(int argc, char **argv)
     const char* rtsp = argv[1];
     int port = atoi(argv[2]);
 
-    cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);    
+    cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);
+    if(!cap.isOpened()){
+        std::cout << "ERRO: não foi possível abrir captura no endereço: " << rtsp << std::endl;
+        return -1;
+    }
+
     std::thread img_stream(imgUpdate, &cap);
     img_stream.detach();
 
