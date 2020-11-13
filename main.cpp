@@ -79,11 +79,10 @@ void imgSendAll(std::set<WebSocket*>* cons, Server* server){
 
 class MyHandler : public WebSocket::Handler {
 public:
-    explicit MyHandler(Server* server, cv::VideoCapture* cap): _server(server), _cap(cap) { }
+    explicit MyHandler(Server* server): _server(server) { }
 
     void onConnect(WebSocket* connection) override {
         _connections.insert(connection);
-        _clients.insert(formatAddress(connection->getRemoteAddress()));
         // std::thread stream_parallel(imgSender, connection, _server);
         // stream_parallel.detach();
     }
@@ -102,7 +101,6 @@ public:
     }
 
     void onDisconnect(WebSocket* connection) override {
-        _clients.erase(formatAddress(connection->getRemoteAddress()));
         _connections.erase(connection);
 
         std::cout << "Disconnected: " << connection->getRequestUri()
@@ -112,8 +110,6 @@ public:
 // private:
     std::set<WebSocket*> _connections;
     Server* _server;
-    cv::VideoCapture* _cap;
-    std::set<std::string> _clients;
 };
 
 int main(int argc, char **argv)
@@ -145,7 +141,7 @@ int main(int argc, char **argv)
     auto logger = std::make_shared<PrintfLogger>(Logger::Level::Debug);
     Server server(logger);
 
-    auto handler = std::make_shared<MyHandler>(&server, &cap);
+    auto handler = std::make_shared<MyHandler>(&server);
     std::thread stream_parallel(imgSendAll, &(handler->_connections), &server);
     stream_parallel.detach();
 
