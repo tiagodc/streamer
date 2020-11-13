@@ -1,6 +1,6 @@
-FROM adnrv/opencv:4.4.0
+FROM adnrv/opencv:3.4
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get clean -y
+RUN apt-get update -y && apt-get clean -y
 
 COPY . /stream_files
 
