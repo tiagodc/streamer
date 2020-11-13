@@ -11,5 +11,3 @@ RUN cd /stream_files && ./build.sh && chmod ugo+x streamer
 WORKDIR /stream_files
 
 ENTRYPOINT ["./streamer"] 
-
-
