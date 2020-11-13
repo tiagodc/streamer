@@ -118,16 +118,18 @@ public:
 
 int main(int argc, char **argv)
 { 
+
     if(argc != 3){
         std::cout << "\n### PANTERA STREAMER ###\n" << std::endl;
         std::cout << "São necessários 2 argumentos no seguinte formato:\n" << std::endl;
-        std::cout << "./streamer <input_rtsp> <output_port>\n" << std::endl;
+        std::cout << "./streamer '<input_rtsp>' <output_port>\n" << std::endl;
         std::cout << "Exemplo:" << std::endl;
         std::cout << "$  ./streamer rtsp://localhost:8554/mystream 9090" << std::endl;
         std::cout << ">> info: Listening on http://hostname:9090/\n" << std::endl;
         return -1;
     }
 
+    // const char* rtsp = "rtsp://service:!S1ntecsy5@200.205.247.132:10002/rtsp_tunnel";
     const char* rtsp = argv[1];
     int port = atoi(argv[2]);
 

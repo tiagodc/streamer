@@ -14,8 +14,9 @@ docker build -f Dockerfile -t cpp-streamer .
 Gere o stream rtsp >> websocket:
 ```
 cd streamer
-docker run -d --rm --network=host cpp-streamer-1 <caminho_rtsp> <porta_de_saida>
+docker run -d --rm --network=host cpp-streamer '<caminho_rtsp>' <porta_de_saida>
 ```
+**`'<caminho_rtsp>'` precisa estar entre aspas simples caso a string tenha alguma exclamação `!`*
 
 Confira o streaming no browser. A porta de teste *default* é `9090`, caso utilize outra é necessário alterar o arquivo `index.html` a corrigir a porta do websocket.
 ```
@@ -50,11 +51,11 @@ vlc rtsp://localhost:8554/mystream
 
 Abra o conversor RTSP >> websocket para o streaming rtsp:
 ```
-docker run --rm --network=host -d cpp-streamer rtsp://localhost:8554/mystream 9090
+docker run --rm --network=host -d cpp-streamer 'rtsp://localhost:8554/mystream' 9090
 ```
 
 Confira o streaming no browser:
 ```
 firefox index.html
 ```
-**Caso utilize uma porta diferente da `9090`, não esqueça de alterar também o arquivo index.html.*
+**caso utilize uma porta diferente da `9090`, não esqueça de alterar também o arquivo index.html.*
