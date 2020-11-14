@@ -42,16 +42,20 @@ void multipleStream(cv::VideoCapture* cap, WebSocket* con, Server* server){
 
 void imgUpdate(cv::VideoCapture* cap, const char* stream_path){   
     cv::Mat frame;
+
     for(;;){
-        if(!cap->isOpened()){
-            std::cout << "Input error" << std::endl;
+        *cap >> frame;
+        if(!cap->isOpened() || frame.empty()){
+            std::cout << "ERRO: perda de conexão com streaming" << std::endl;
             latest_img = error_img;
+            std::chrono::milliseconds interval(500);
+            std::this_thread::sleep_for(interval);
             cv::VideoCapture recap(stream_path, cv::CAP_FFMPEG);
-            cap = &recap;
+            cap->release();
+            *cap = recap;
             continue;
         }
 
-        *cap >> frame;
         std::vector<uchar> buf;
         cv::imencode(".jpg", frame, buf);
         auto *enc_msg = reinterpret_cast<unsigned char*>(buf.data());
@@ -135,7 +139,6 @@ int main(int argc, char **argv)
     cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);
     unsigned int ct = 0;
     while(!cap.isOpened()){
-        std::cout << "trial: " << ct << std::endl;
         if(ct++ == 0) cap.release();
         cv::VideoCapture recap(rtsp, cv::CAP_FFMPEG);
         if(ct >= 20){
