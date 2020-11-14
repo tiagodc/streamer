@@ -20,7 +20,7 @@
 #include "main.h"
 
 using namespace seasocks;
-std::string latest_img = "blablabla";
+std::string latest_img = error_img;
 
 void multipleStream(cv::VideoCapture* cap, WebSocket* con, Server* server){
 
@@ -40,15 +40,17 @@ void multipleStream(cv::VideoCapture* cap, WebSocket* con, Server* server){
       }
 }
 
-void imgUpdate(cv::VideoCapture* cap){
-    if(!cap->isOpened()){   
-        std::cout << "Input error" << std::endl;
-        latest_img = error_img;
-        return;
-    }
-    
+void imgUpdate(cv::VideoCapture* cap, const char* stream_path){   
     cv::Mat frame;
     for(;;){
+        if(!cap->isOpened()){
+            std::cout << "Input error" << std::endl;
+            latest_img = error_img;
+            cv::VideoCapture recap(stream_path, cv::CAP_FFMPEG);
+            cap = &recap;
+            continue;
+        }
+
         *cap >> frame;
         std::vector<uchar> buf;
         cv::imencode(".jpg", frame, buf);
@@ -131,12 +133,20 @@ int main(int argc, char **argv)
     int port = atoi(argv[2]);
 
     cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);
-    if(!cap.isOpened()){
-        std::cout << "ERRO: não foi possível abrir captura no endereço: " << rtsp << std::endl;
-        return -1;
+    unsigned int ct = 0;
+    while(!cap.isOpened()){
+        std::cout << "trial: " << ct << std::endl;
+        if(ct++ == 0) cap.release();
+        cv::VideoCapture recap(rtsp, cv::CAP_FFMPEG);
+        if(ct >= 20){
+            std::cout << "ERRO: não foi possível abrir captura no endereço: " << rtsp << std::endl;
+            return -1;
+        }
+        std::chrono::milliseconds interval(1000);
+        std::this_thread::sleep_for(interval);
     }
 
-    std::thread img_stream(imgUpdate, &cap);
+    std::thread img_stream(imgUpdate, &cap, rtsp);
     img_stream.detach();
 
     auto logger = std::make_shared<PrintfLogger>(Logger::Level::Debug);
