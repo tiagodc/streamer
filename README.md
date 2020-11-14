@@ -14,7 +14,10 @@ docker build -f Dockerfile -t cpp-streamer .
 Gere o stream rtsp >> websocket:
 ```
 cd streamer
+# linux
 docker run -d --rm --network=host cpp-streamer '<caminho_rtsp>' <porta_de_saida>
+#windows
+docker run -d --rm -p <porta_de_saida>:<porta_de_saida> cpp-streamer '<caminho_rtsp>' <porta_de_saida>
 ```
 **`'<caminho_rtsp>'` precisa estar entre aspas simples caso a string tenha alguma exclamação `!`*
 
@@ -51,7 +54,7 @@ vlc rtsp://localhost:8554/mystream
 
 Abra o conversor RTSP >> websocket para o streaming rtsp:
 ```
-docker run --rm --network=host -d cpp-streamer 'rtsp://localhost:8554/mystream' 9090
+docker run --rm -p 9090:9090 -d cpp-streamer 'rtsp://localhost:8554/mystream' 9090
 ```
 
 Confira o streaming no browser:
