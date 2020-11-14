@@ -126,6 +126,7 @@ int main(int argc, char **argv)
     }
 
     // const char* rtsp = "rtsp://service:!S1ntecsy5@200.205.247.132:10002/rtsp_tunnel";
+    // const char* rtsp = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
     const char* rtsp = argv[1];
     int port = atoi(argv[2]);
 

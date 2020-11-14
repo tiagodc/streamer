@@ -1,4 +1,4 @@
-FROM adnrv/opencv:3.4
+FROM adnrv/opencv:4.4.0
 
 RUN apt-get update -y && apt-get clean -y
 
