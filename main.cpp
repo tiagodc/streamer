@@ -139,8 +139,10 @@ int main(int argc, char **argv)
     cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);
     unsigned int ct = 0;
     while(!cap.isOpened()){
-        if(ct++ == 0) cap.release();
+        std::cout << "AVISO: tentativa de conexão " << ++ct << " recusada no endereço " << rtsp << std::endl;
+        cap.release();
         cv::VideoCapture recap(rtsp, cv::CAP_FFMPEG);
+        cap = recap;
         if(ct >= 20){
             std::cout << "ERRO: não foi possível abrir captura no endereço: " << rtsp << std::endl;
             return -1;
