@@ -62,8 +62,6 @@ public:
 
     void onConnect(WebSocket* connection) override {
         _connections.insert(connection);
-        // std::thread stream_parallel(imgSender, connection, _server);
-        // stream_parallel.detach();
     }
 
     void onData(WebSocket* connection, const char* data) override {
