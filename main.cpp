@@ -22,24 +22,6 @@
 using namespace seasocks;
 std::string latest_img = error_img;
 
-void multipleStream(cv::VideoCapture* cap, WebSocket* con, Server* server){
-
-      if(!cap->isOpened()){   
-          std::cout << "Input error" << std::endl;
-          return;
-      }else{
-          cv::Mat frame;
-          for(;;){
-              *cap >> frame;
-              std::vector<uchar> buf;
-              cv::imencode(".jpg", frame, buf);
-              auto *enc_msg = reinterpret_cast<unsigned char*>(buf.data());
-              std::string encoded = base64Encode(enc_msg, buf.size());
-              server->execute([con, encoded]{ con->send(error_img.c_str()); });
-          }
-      }
-}
-
 void imgUpdate(cv::VideoCapture* cap, const char* stream_path){   
     cv::Mat frame;
 
@@ -64,21 +46,12 @@ void imgUpdate(cv::VideoCapture* cap, const char* stream_path){
     }
 }
 
-void imgSender(WebSocket* con, Server* server){    
-    for(;;){
-        if(!con) return;
-        server->execute([con]{ con->send(latest_img.c_str()); });
-        std::chrono::milliseconds interval(10);
-        std::this_thread::sleep_for(interval);
-    }
-}
-
-void imgSendAll(std::set<WebSocket*>* cons, Server* server){    
+void imgSendAll(std::set<WebSocket*>* cons, Server* server, unsigned int* ms){    
     for(;;){
         for(auto* con : *cons){
             if(con) server->execute([con]{ con->send(latest_img.c_str()); });            
         }
-        std::chrono::milliseconds interval(10);
+        std::chrono::milliseconds interval(*ms);
         std::this_thread::sleep_for(interval);
     }
 }
@@ -121,12 +94,12 @@ public:
 int main(int argc, char **argv)
 { 
 
-    if(argc != 3){
+    if(argc != 4){
         std::cout << "\n### PANTERA STREAMER ###\n" << std::endl;
-        std::cout << "São necessários 2 argumentos no seguinte formato:\n" << std::endl;
-        std::cout << "./streamer '<input_rtsp>' <output_port>\n" << std::endl;
+        std::cout << "São necessários 3 argumentos no seguinte formato:\n" << std::endl;
+        std::cout << "./streamer '<input_rtsp>' <output_port> <intervalo_de_atualizaçao_em_ms>\n" << std::endl;
         std::cout << "Exemplo:" << std::endl;
-        std::cout << "$  ./streamer rtsp://localhost:8554/mystream 9090" << std::endl;
+        std::cout << "$  ./streamer rtsp://localhost:8554/mystream 9090 500" << std::endl;
         std::cout << ">> info: Listening on http://hostname:9090/\n" << std::endl;
         return -1;
     }
@@ -134,7 +107,8 @@ int main(int argc, char **argv)
     // const char* rtsp = "rtsp://service:!S1ntecsy5@200.205.247.132:10002/rtsp_tunnel";
     // const char* rtsp = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
     const char* rtsp = argv[1];
-    int port = atoi(argv[2]);
+    unsigned int port = atoi(argv[2]);
+    unsigned int milisecs = atoi(argv[3]);
 
     cv::VideoCapture cap(rtsp, cv::CAP_FFMPEG);
     unsigned int ct = 0;
@@ -158,7 +132,7 @@ int main(int argc, char **argv)
     Server server(logger);
 
     auto handler = std::make_shared<MyHandler>(&server);
-    std::thread stream_parallel(imgSendAll, &(handler->_connections), &server);
+    std::thread stream_parallel(imgSendAll, &(handler->_connections), &server, &milisecs);
     stream_parallel.detach();
 
     server.addWebSocketHandler("/ws", handler);
